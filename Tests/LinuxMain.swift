@@ -44,5 +44,9 @@ extension Sequence {
 }
 
 XCTMain([
-    testCase(WebSocketClientTests.allTests.shuffled()),
+    testCase(BasicTests.allTests.shuffled()),
+    testCase(ComplexTests.allTests.shuffled()),
+    testCase(ProtocolError.allTests.shuffled()),
+    testCase(ConnectionCleanUptests.allTests.shuffled()),
+    testCase(DelegateTests.allTests.shuffled()),
 ].shuffled())

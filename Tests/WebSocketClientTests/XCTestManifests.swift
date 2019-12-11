@@ -18,7 +18,11 @@ import XCTest
 #if !canImport(ObjectiveC)
 public func allTests() -> [XCTestCaseEntry] {
     return [
-        testCase(WebSocketClientTests.allTests),
+        testCase(BasicTests.allTests),
+        testCase(ComplexTests.allTests),
+        testCase(ProtocolError.allTests),
+        testCase(ConnectionCleanUptests.allTests),
+        testCase(DelegateTests.allTests),
     ]
 }
 #endif
