@@ -614,7 +614,7 @@ class HTTPClientHandler: ChannelInboundHandler, RemovableChannelHandler {
         if client.delegate != nil {
             client.delegate?.onError(error: error, status: nil)
         } else {
-        client.onErrorCallBack(error, nil)
+            client.onErrorCallBack(error, nil)
         }
     }
 
