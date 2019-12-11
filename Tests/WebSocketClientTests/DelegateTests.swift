@@ -25,6 +25,20 @@ import NIOFoundationCompat
 
 class DelegateTests: WebSocketClientTests {
 
+    static var allTests: [(String, (DelegateTests) -> () throws -> Void)] {
+        return [
+            ("testTextCallBackDelegate", testTextCallBackDelegate),
+            ("testBinaryCallBackDelegate", testBinaryCallBackDelegate),
+            ("testCloseCallBackDelegate", testCloseCallBackDelegate),
+            ("testPongCallBackDelegate", testPongCallBackDelegate),
+            ("testErrorCallBackDelegate", testErrorCallBackDelegate),
+            ("testOnBinaryDelegatePriority", testOnBinaryDelegatePriority),
+            ("testOnTextDelegatePriority", testOnTextDelegatePriority),
+            ("testOnPongDelegatePriority", testOnPongDelegatePriority),
+            ("testOnCloseDelegatePriority", testOnCloseDelegatePriority),
+        ]
+    }
+
     let uint8Code: Data = Data([UInt8(WebSocketCloseReasonCode.normal.code() >> 8),
                                      UInt8(WebSocketCloseReasonCode.normal.code() & 0xff)])
 

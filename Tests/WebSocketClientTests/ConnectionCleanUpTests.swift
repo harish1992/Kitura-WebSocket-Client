@@ -24,6 +24,15 @@ import NIOHTTP1
 
 class ConnectionCleanUptests: WebSocketClientTests {
 
+    static var allTests: [(String, (ConnectionCleanUptests) -> () throws -> Void)] {
+        return [
+            ("testNilConnectionTimeOut", testNilConnectionTimeOut),
+            ("testSingleConnectionTimeOut", testSingleConnectionTimeOut),
+            ("testPingKeepsConnectionAlive", testPingKeepsConnectionAlive),
+            ("testMultiConnectionTimeOut", testMultiConnectionTimeOut)
+        ]
+    }
+
     func testNilConnectionTimeOut() {
             let echoDelegate = EchoService()
             WebSocket.register(service: echoDelegate, onPath: self.servicePath)

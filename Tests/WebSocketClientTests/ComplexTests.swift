@@ -24,6 +24,22 @@ import NIOHTTP1
 
 class ComplexTests: WebSocketClientTests {
 
+    static var allTests: [(String, (ComplexTests) -> () throws -> Void)] {
+        return [
+            ("testBinaryShortAndMediumFrames", testBinaryShortAndMediumFrames),
+            ("testTwoBinaryShortFrames", testTwoBinaryShortFrames),
+            ("testPingBetweenBinaryFrames", testPingBetweenBinaryFrames),
+            ("testPingBetweenTextFrames", testPingBetweenTextFrames),
+            ("testTextShortAndMediumFrames", testTextShortAndMediumFrames),
+            ("testTextTwoShortFrames", testTextTwoShortFrames),
+            ("testTwoMessagesWithContextTakeover", testTwoMessagesWithContextTakeover),
+            ("testTwoMessagesWithClientContextTakeover", testTwoMessagesWithClientContextTakeover),
+            ("testTwoMessagesWithServerContextTakeover", testTwoMessagesWithServerContextTakeover),
+            ("testTwoMessagesWithNoContextTakeover", testTwoMessagesWithNoContextTakeover)
+        ]
+    }
+    
+
     func testBinaryShortAndMediumFrames() {
         let echoDelegate = EchoService()
         WebSocket.register(service: echoDelegate, onPath: self.servicePath)

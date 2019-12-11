@@ -24,6 +24,26 @@ import NIOHTTP1
 
 class BasicTests: WebSocketClientTests {
 
+    static var allTests: [(String, (BasicTests) -> () throws -> Void)] {
+        return [
+            ("testTextMessage", testTextMessage),
+            ("testDataMessage", testDataMessage),
+            ("testBinaryLongMessage", testBinaryLongMessage),
+            ("testBinaryMediumMessage", testBinaryMediumMessage),
+            ("testBinaryShortMessage", testBinaryShortMessage),
+            ("testClientInitWithURL", testClientInitWithURL),
+            ("testPingWithText", testPingWithText),
+            ("testSuccessfulRemove", testSuccessfulRemove),
+            ("testTextLongMessage", testTextLongMessage),
+            ("testTextMediumMessage", testTextMediumMessage),
+            ("testTextShortMessage", testTextShortMessage),
+            ("testSendCodableType",testSendCodableType),
+            ("testNullCharacter", testNullCharacter),
+            ("testUserDefinedCloseCode", testUserDefinedCloseCode),
+            ("testUserCloseMessage", testUserCloseMessage)
+        ]
+    }
+
     func testTextMessage() {
         let echoDelegate = EchoService()
         WebSocket.register(service: echoDelegate, onPath: self.servicePath)
@@ -377,6 +397,36 @@ class BasicTests: WebSocketClientTests {
             }
             client.connect()
             client.sendText(text, compressed: true)
+        })
+    }
+
+    func testSendCodableType() {
+        let echoDelegate = EchoService()
+        WebSocket.register(service: echoDelegate, onPath: self.servicePath)
+        performServerTest(asyncTasks: { expectation in
+            struct Details: Codable, Equatable {
+                var name: String = ""
+                var age: Int = 0
+            }
+            var textPayload = Details()
+            textPayload.name = "Hello"
+            textPayload.age = 12
+            guard let client = WebSocketClient("http://localhost:8080/wstester") else {
+                XCTFail("Unable to create client")
+                return
+            }
+            client.connect()
+            client.send(model: textPayload)
+            client.onText { recieved in
+                let jsonDecoder = JSONDecoder()
+                do {
+                    let recievedDetails = try jsonDecoder.decode(Details.self, from: recieved.data(using: .utf8)!)
+                    XCTAssertEqual(recievedDetails, textPayload, "The received payload \(recievedDetails) is not equal to the expected payload \(textPayload).")
+                    expectation.fulfill()
+                } catch {
+                    print(error)
+                }
+            }
         })
     }
 

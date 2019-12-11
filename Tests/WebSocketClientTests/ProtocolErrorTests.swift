@@ -24,6 +24,20 @@ import NIOHTTP1
 import NIOFoundationCompat
 
 class ProtocolError: WebSocketClientTests {
+
+    static var allTests: [(String, (ProtocolError) -> () throws -> Void)] {
+        return [
+            ("testBinaryAndTextFrames", testBinaryAndTextFrames),
+            ("testPingWithOversizedPayload", testPingWithOversizedPayload),
+            ("testFragmentedPing", testFragmentedPing),
+            ("testCloseWithOversizedPayload", testCloseWithOversizedPayload),
+            ("testJustContinuationFrame", testJustContinuationFrame),
+            ("testInvalidUTFCloseMessage", testInvalidUTFCloseMessage),
+            ("testTextAndBinaryFrames", testTextAndBinaryFrames),
+            ("testUnmaskedFrame", testUnmaskedFrame),
+            ("testInvalidRSV", testInvalidRSV),
+        ]
+    }
     
     let uint8Code: Data = Data([UInt8(WebSocketCloseReasonCode.protocolError.code() >> 8),
                                   UInt8(WebSocketCloseReasonCode.protocolError.code() & 0xff)])
