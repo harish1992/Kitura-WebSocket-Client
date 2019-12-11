@@ -19,7 +19,6 @@ import NIO
 import NIOHTTP1
 import NIOWebSocket
 import Dispatch
-import XCTest
 import WebSocketCompression
 import NIOFoundationCompat
 import NIOSSL
@@ -38,35 +37,37 @@ public class WebSocketClient {
     public var maxFrameSize: Int
     var enableSSL: Bool = false
 
-    //  This semaphore signals when the client successfully recieves the Connection upgrade response from remote server
-    //  Ensures that webSocket frames are sent on channel only after the connection is successfully upgraded to WebSocket Connection
+    ///  This semaphore signals when the client successfully recieves the Connection upgrade response from remote server
+    ///  Ensures that webSocket frames are sent on channel only after the connection is successfully upgraded to WebSocket Connection
 
     let upgraded = DispatchSemaphore(value: 0)
 
-    let compressionConfig: CompressionConfig?
+    let callBackSync = DispatchQueue(label: "ErrorCallbackSync")
 
-    // Create a new `WebSocketClient`.
-    //
-    //
-    //         Example usage:
-    //             let client = WebSocketClient(host: "localhost", port: 8080, uri: "/", requestKey: "test")
-    //
-    //         // See RFC 7692 for to know more about compression negotiation
-    //         Example usage with compression enabled:
-    //             let client = WebSocketClient(host: "localhost", port: 8080, uri: "/", requestKey: "test", negotiateCompression: true)
-    //
-    // - parameters:
-    //     - host: Host name of the remote server
-    //     - port: Port number on which the remote server is listening
-    //     - uri : The "Request-URI" of the GET method, it is used to identify the endpoint of the WebSocket connection
-    //     - requestKey: The requestKey sent by client which server has to include while building it's response. This helps ensure that the server
-    //                   does not accept connections from non-WebSocket clients
-    //     - maxFrameSize : Maximum allowable frame size of WebSocket client is configured using this parameter.
-    //                      Default value is `14`.
-    //     - compressionConfig : compression configuration
+    let compressionConfig: WebSocketCompressionConfiguration?
+
+    /// Create a new `WebSocketClient`.
+    ///
+    ///
+    ///         Example usage:
+    ///             let client = WebSocketClient(host: "localhost", port: 8080, uri: "/", requestKey: "test")
+    ///
+    ///         // See RFC 7692 for to know more about compression negotiation
+    ///         Example usage with compression enabled:
+    ///             let client = WebSocketClient(host: "localhost", port: 8080, uri: "/", requestKey: "test", negotiateCompression: true)
+    ///
+    /// - parameters:
+    ///     - host: Host name of the remote server
+    ///     - port: Port number on which the remote server is listening
+    ///     - uri : The "Request-URI" of the GET method, it is used to identify the endpoint of the WebSocket connection
+    ///     - requestKey: The requestKey sent by client which server has to include while building it's response. This helps ensure that the server
+    ///                   does not accept connections from non-WebSocket clients
+    ///     - maxFrameSize : Maximum allowable frame size of WebSocket client is configured using this parameter.
+    ///                      Default value is `14`.
+    ///     - compressionConfig : compression configuration
 
     public init?(host: String, port: Int, uri: String, requestKey: String,
-                 compressionConfig: CompressionConfig? = nil, maxFrameSize: Int = 14, enableSSL: Bool = false, onOpen: @escaping (Channel?) -> Void = { _ in }) {
+                 compressionConfig: WebSocketCompressionConfiguration? = nil, maxFrameSize: Int = 14, enableSSL: Bool = false, onOpen: @escaping (Channel?) -> Void = { _ in }) {
         self.requestKey = requestKey
         self.host = host
         self.port = port
@@ -77,21 +78,21 @@ public class WebSocketClient {
         self.enableSSL = enableSSL
     }
 
-    // Create a new `WebSocketClient`.
-    //
-    //
-    //         Example usage:
-    //             let client = WebSocketClient("ws://localhost:8080/chat")
-    //
-    //         // See RFC 7692 for to know more about compression negotiation
-    //         Example usage with compression enabled:
-    //             let client = WebSocketClient(host: "localhost", port: 8080, uri: "/", requestKey: "test", negotiateCompression: true)
-    //
-    // - parameters:
-    //     - url : The "Request-URl" of the GET method, it is used to identify the endpoint of the WebSocket connection
-    //     - compressionConfig : compression configuration
+    /// Create a new `WebSocketClient`.
+    ///
+    ///
+    ///         Example usage:
+    ///             let client = WebSocketClient("ws://localhost:8080/chat")
+    ///
+    ///         // See RFC 7692 for to know more about compression negotiation
+    ///         Example usage with compression enabled:
+    ///             let client = WebSocketClient(host: "localhost", port: 8080, uri: "/", requestKey: "test", negotiateCompression: true)
+    ///
+    /// - parameters:
+    ///     - url : The "Request-URl" of the GET method, it is used to identify the endpoint of the WebSocket connection
+    ///     - compressionConfig : compression configuration
 
-    public init?(_ url: String, config: CompressionConfig? = nil) {
+    public init?(_ url: String, config: WebSocketCompressionConfiguration? = nil) {
         self.requestKey = "test"
         let rawUrl = URL(string: url)
         self.host = rawUrl?.host ?? "localhost"
@@ -106,32 +107,32 @@ public class WebSocketClient {
 
     public var delegate: WebSocketClientDelegate? = nil
 
-    // Whether close frame is sent to server
+    /// Whether close frame is sent to server
     var closeSent: Bool = false
 
-    // Whether the client is still alive
+    /// Whether the client is still alive
     public var isConnected: Bool {
         return self.channel?.isActive ?? false
     }
 
-    public func connect() {
+    public func connect() throws {
         do {
             try makeConnection()
         } catch {
-            return
+            throw WebSocketClientConnectionError.WebSocketClientConnectionFailed
         }
     }
 
-    //  Used only for testing
-    //  Decides whether the websocket frame sent has to be masked or not
+    ///  Used only for testing
+    ///  Decides whether the websocket frame sent has to be masked or not
     public var maskFrame: Bool = true
 
-    // This function pings to the connected server
-    //
-    //             client.ping()
-    //
-    // - parameters:
-    //     - data: ping frame payload, must be less than 125 bytes
+    /// This function pings to the connected server
+    ///
+    ///             client.ping()
+    ///
+    /// - parameters:
+    ///     - data: ping frame payload, must be less than 125 bytes
 
     public func ping(data: Data = Data()) {
         var buffer = ByteBufferAllocator().buffer(capacity: data.count)
@@ -140,12 +141,12 @@ public class WebSocketClient {
 
     }
 
-    // Sends a pong frame to the connected server
-    //
-    //             client.pong()
-    //
-    // - parameters:
-    //     - data: frame payload, must be less than 125 bytes
+    /// Sends a pong frame to the connected server
+    ///
+    ///             client.pong()
+    ///
+    /// - parameters:
+    ///     - data: frame payload, must be less than 125 bytes
 
     public func pong(data: Data = Data()) {
         var buffer = ByteBufferAllocator().buffer(capacity: data.count)
@@ -153,12 +154,12 @@ public class WebSocketClient {
         send(data: buffer, opcode: .pong, finalFrame: true, compressed: false)
     }
 
-    // This function closes the connection
-    //
-    //             client.close()
-    //
-    // - parameters:
-    //     - data: close frame payload, must be less than 125 bytes
+    /// This function closes the connection
+    ///
+    ///             client.close()
+    ///
+    /// - parameters:
+    ///     - data: close frame payload, must be less than 125 bytes
 
     public func close(data: Data = Data()) {
         closeSent = true
@@ -167,17 +168,17 @@ public class WebSocketClient {
         send(data: buffer, opcode: .connectionClose, finalFrame: true, compressed: false)
     }
 
-    // This function sends binary-formatted data to the connected server in multiple frames
-    //
-    //             // server recieves [0x11 ,0x12, 0x13] when following is sent
-    //             client.sendBinary(data: Data([0x11,0x12]), opcode: .binary, finalFrame: false)
-    //             client.sendMessage(data: Data([0x13]), opcode: .continuation, finalFrame: true)
-    //
-    // - parameters:
-    //     - data: raw binary data to be sent in the frame
-    //     - opcode: Websocket opcode indicating type of the frame
-    //     - finalFrame: Whether the frame to be sent is the last one, by default this is set to `true`
-    //     - compressed: Whether to compress the current frame to be sent, by default compression is disabled
+    /// This function sends binary-formatted data to the connected server in multiple frames
+    ///
+    ///             // server recieves [0x11 ,0x12, 0x13] when following is sent
+    ///             client.sendBinary(data: Data([0x11,0x12]), opcode: .binary, finalFrame: false)
+    ///             client.sendMessage(data: Data([0x13]), opcode: .continuation, finalFrame: true)
+    ///
+    /// - parameters:
+    ///     - data: raw binary data to be sent in the frame
+    ///     - opcode: Websocket opcode indicating type of the frame
+    ///     - finalFrame: Whether the frame to be sent is the last one, by default this is set to `true`
+    ///     - compressed: Whether to compress the current frame to be sent, by default compression is disabled
 
     public func sendBinary(_ binary: Data, opcode: WebSocketOpcode = .binary, finalFrame: Bool = true, compressed: Bool = false) {
         var buffer = ByteBufferAllocator().buffer(capacity: binary.count)
@@ -185,17 +186,17 @@ public class WebSocketClient {
         send(data: buffer, opcode: opcode, finalFrame: finalFrame, compressed: compressed)
     }
 
-    // This function sends text-formatted data to the connected server in multiple frames
-    //
-    //             // server recieves "Kitura-WebSocket-NIO" when following is sent
-    //             client.sendMessage(raw: "Kitura-WebSocket", opcode: .text, finalFrame: false)
-    //             client.sendMessage(raw: "-NIO", opcode: .continuation, finalFrame: true)
-    //
-    // - parameters:
-    //     - raw: raw text to be sent in the frame
-    //     - opcode: Websocket opcode indicating type of the frame
-    //     - finalFrame: Whether the frame to be sent is the last one, by default this is set to `true`
-    //     - compressed: Whether to compress the current frame to be sent, by default this set to `false`
+    /// This function sends text-formatted data to the connected server in multiple frames
+    ///
+    ///             // server recieves "Kitura-WebSocket-NIO" when following is sent
+    ///             client.sendMessage(raw: "Kitura-WebSocket", opcode: .text, finalFrame: false)
+    ///             client.sendMessage(raw: "-NIO", opcode: .continuation, finalFrame: true)
+    ///
+    /// - parameters:
+    ///     - raw: raw text to be sent in the frame
+    ///     - opcode: Websocket opcode indicating type of the frame
+    ///     - finalFrame: Whether the frame to be sent is the last one, by default this is set to `true`
+    ///     - compressed: Whether to compress the current frame to be sent, by default this set to `false`
 
     public func sendText(_ string: String, opcode: WebSocketOpcode = .text, finalFrame: Bool = true, compressed: Bool = false) {
         var buffer = ByteBufferAllocator().buffer(capacity: string.count)
@@ -216,15 +217,15 @@ public class WebSocketClient {
         }
     }
 
-    // This function sends IOData(ByteBuffer) to the connected server
-    //
-    //             client.sendMessage(data: byteBuffer, opcode: opcode)
-    //
-    // - parameters:
-    //     - data: ByteBuffer-formatted to be sent in the frame
-    //     - opcode: Websocket opcode indicating type of the frame
-    //     - finalFrame: Whether the frame to be sent is the last one, by default this is set to `true`
-    //     - compressed: Whether to compress the current frame to be sent, by default this set to `false`
+    /// This function sends IOData(ByteBuffer) to the connected server
+    ///
+    ///             client.sendMessage(data: byteBuffer, opcode: opcode)
+    ///
+    /// - parameters:
+    ///     - data: ByteBuffer-formatted to be sent in the frame
+    ///     - opcode: Websocket opcode indicating type of the frame
+    ///     - finalFrame: Whether the frame to be sent is the last one, by default this is set to `true`
+    ///     - compressed: Whether to compress the current frame to be sent, by default this set to `false`
 
     public func sendMessage(data: Data, opcode: WebSocketOpcode, finalFrame: Bool = true, compressed: Bool = false) {
         var buffer = ByteBufferAllocator().buffer(capacity: data.count)
@@ -235,8 +236,8 @@ public class WebSocketClient {
         send(data: buffer, opcode: opcode, finalFrame: finalFrame, compressed: compressed)
     }
 
-    //  This function generates masking key to mask the payload to be sent on the WebSocketframe
-    //  Data is automatically masked unless specified otherwise by property 'maskFrame'
+    ///  This function generates masking key to mask the payload to be sent on the WebSocketframe
+    ///  Data is automatically masked unless specified otherwise by property 'maskFrame'
     func generateMaskingKey() -> WebSocketMaskingKey {
         let mask: [UInt8] = [.random(in: 0..<255), .random(in: 0..<255), .random(in: 0..<255), .random(in: 0..<255)]
         return WebSocketMaskingKey(mask)!
@@ -301,84 +302,150 @@ public class WebSocketClient {
         }
     }
 
-    // Calculates th LZ77 sliding window size from server response
+    /// Calculates th LZ77 sliding window size from server response
     private func windowSize(header: HTTPHeaders) -> Int32 {
         return header["Sec-WebSocket-Extensions"].first?.split(separator: ";")
             .dropFirst().first?.split(separator: "=").last.flatMap({ Int32($0)}) ?? self.compressionConfig!.maxWindowBits
     }
 
-    // Stored callbacks
-    var onOpenCallback: (Channel) -> Void = {_ in }
+    /// Stored callbacks
+    // note: setter and getters of callback functions need to be synchronized to avoid TSan errors
 
-    var onCloseCallback: (Channel, Data) -> Void = { _,_ in }
+    var onOpenCallback: (Channel) -> Void = { _ in }
 
-    var onTextCallback: (String) -> Void = { _ in }
+    var _closeCallback: (Channel, Data) -> Void = { _,_ in }
 
-    var onBinaryCallback: (Data) -> Void = { _ in }
+    var onCloseCallback: (Channel, Data) -> Void {
+        get {
+            return callBackSync.sync {
+                return _closeCallback
+            }
+        }
+        set {
+            _ = callBackSync.sync {
+                _closeCallback = newValue
+            }
+        }
+    }
 
-    var onPingCallback: (Data) -> Void = { _ in }
+    var _textCallback: (String) -> Void = { _ in }
 
-    var onPongCallback: (WebSocketOpcode, Data) -> Void = { _,_ in}
+    var onTextCallback: (String) -> Void {
+        get {
+            return callBackSync.sync {
+                return _textCallback
+            }
+        }
+        set {
+            _ = callBackSync.sync {
+                _textCallback = newValue
+            }
+        }
+    }
+    
+    var _binaryCallback: (Data) -> Void = { _ in }
 
-    var onErrorCallBack: (Error?, HTTPResponseStatus?) -> Void = { _,_  in }
+    var onBinaryCallback: (Data) -> Void {
+        get {
+            return callBackSync.sync {
+                return _binaryCallback
+            }
+        }
+        set {
+            _ = callBackSync.sync {
+                _binaryCallback = newValue
+            }
+        }
+    }
 
-    // callback functions
-    // These functions are called when client gets reply from another endpoint
-    //
-    //     Example usage:
-    //         Consider an endpoint sending data, callback function onMessage is triggered
-    //         and receieved data is available as bytebuffer
-    //
-    //         client.onMessage { receivedData in  // receieved byteBuffer
-    //                    // do something with recieved ByteBuffer
-    //                 }
-    //
-    // Other callback functions are used similarly.
-    //
+    var _pingCallback: (Data) -> Void = { _ in }
+
+    var onPingCallback: (Data) -> Void {
+        get {
+            return callBackSync.sync {
+                return _pingCallback
+            }
+        }
+        set {
+            _ = callBackSync.sync {
+                _pingCallback = newValue
+            }
+        }
+    }
+
+    var _pongCallback: (WebSocketOpcode, Data) -> Void = { _,_ in}
+
+      var onPongCallback: (WebSocketOpcode, Data) -> Void {
+          get {
+              return callBackSync.sync {
+                  return _pongCallback
+              }
+          }
+          set {
+              _ = callBackSync.sync {
+                  _pongCallback = newValue
+              }
+          }
+      }
+
+    var _errorCallBack: (Error?, HTTPResponseStatus?) -> Void = { _,_ in }
+
+    var onErrorCallBack: (Error?, HTTPResponseStatus?) -> Void {
+
+        get {
+            return callBackSync.sync {
+                return _errorCallBack
+            }
+        }
+        set {
+            _ = callBackSync.sync {
+                _errorCallBack = newValue
+            }
+        }
+    }
+
+    /// callback functions
+    /// These functions are called when client gets reply from another endpoint
+    ///
+    ///     Example usage:
+    ///         Consider an endpoint sending data, callback function onMessage is triggered
+    ///         and receieved data is available as bytebuffer
+    ///
+    ///         client.onMessage { receivedData in  // receieved byteBuffer
+    ///                    // do something with recieved ByteBuffer
+    ///                 }
+    ///
+    /// Other callback functions are used similarly.
+    ///
 
     public func onText(_ callback: @escaping (String) -> Void) {
-//        executeOnEventLoop { self.onTextCallback = callback }
         self.onTextCallback = callback
     }
 
     public func onBinary(_ callback: @escaping (Data) -> Void) {
-//        executeOnEventLoop { self.onBinaryCallback = callback }
         self.onBinaryCallback = callback
-        }
+    }
 
     public func onClose(_ callback: @escaping (Channel, Data) -> Void) {
-//        executeOnEventLoop { self.onCloseCallback = callback }
         self.onCloseCallback = callback
     }
 
     public func onPing(_ callback: @escaping (Data) -> Void) {
-//        executeOnEventLoop { self.onPingCallback = callback }
         self.onPingCallback = callback
     }
 
     public func onPong(_ callback: @escaping (WebSocketOpcode, Data) -> Void) {
-//        executeOnEventLoop { self.onPongCallback  = callback }
-        self.onPongCallback  = callback
+        self.onPongCallback = callback
+        
     }
 
     public func onError(_ callback: @escaping (Error?, HTTPResponseStatus?) -> Void) {
         self.onErrorCallBack  = callback
     }
 
-//    private func executeOnEventLoop(_ code: @escaping () -> Void) {
-//        self.channel?.eventLoop.execute(code)
-//    }
-
-//    fileprivate func disconnect()  {
-//        do {
-//            try self.group.syncShutdownGracefully()
-//        } catch {
-//            return
-//        }
-//    }
 }
 
-// WebSocket Handler which recieves data over WebSocket Connection
+/// WebSocket Handler which recieves data over WebSocket Connection
 class WebSocketMessageHandler: ChannelInboundHandler, RemovableChannelHandler {
     typealias InboundIn = WebSocketFrame
 
@@ -508,7 +575,7 @@ class WebSocketMessageHandler: ChannelInboundHandler, RemovableChannelHandler {
     }
 }
 
-// This handler is used to send WebSocketUpgrade ugrade request to server
+/// This handler is used to send WebSocketUpgrade ugrade request to server
 class HTTPClientHandler: ChannelInboundHandler, RemovableChannelHandler {
 
     typealias InboundIn = HTTPClientResponsePart
@@ -590,9 +657,9 @@ extension HTTPVersion {
     static let http11 = HTTPVersion(major: 1, minor: 1)
 }
 
-//  This enum is used to populate 'Sec-WebSocket-Extension' field of upgrade header with user required ContextTakeover configuration
-//  User specifies the the context Takeover configuration when creating the WebSocketClient
-//  when not specified both the client and server connections are context takeover enabled
+///  This enum is used to populate 'Sec-WebSocket-Extension' field of upgrade header with user required ContextTakeover configuration
+///  User specifies the the context Takeover configuration when creating the WebSocketClient
+///  when not specified both the client and server connections are context takeover enabled
 
 public enum ContextTakeover {
     case none
@@ -618,7 +685,7 @@ public enum ContextTakeover {
     }
 }
 
-// WebSocket Client errors
+/// WebSocket Client errors
 enum WebSocketClientError: UInt, Error {
     case webSocketUrlNotRegistered = 404
     case badRequest = 400
@@ -633,34 +700,52 @@ enum WebSocketClientError: UInt, Error {
     }
 }
 
-// Protocol to delegate callbacks. These functions are called when client gets reply from another endpoint
+/// webSocket connections errors
+/// Client throws `WebSocketClientConnectionErrorType` when it is unable to connect to WS endpoint.
+
+public struct WebSocketClientConnectionError: Error, Equatable {
+
+    internal enum WebSocketClientConnectionErrorType: Error {
+        case WebSocketClientConnectionFailed
+    }
+
+    private var _wsClientError: WebSocketClientConnectionErrorType
+
+    private init(value: WebSocketClientConnectionErrorType) {
+        self._wsClientError = value
+    }
+
+    public static var WebSocketClientConnectionFailed = WebSocketClientConnectionError(value: .WebSocketClientConnectionFailed)
+}
+
+/// Protocol to delegate callbacks. These functions are called when client gets reply from another endpoint
 public protocol WebSocketClientDelegate {
 
-    // Called when message is recieved from server
+    /// Called when message is recieved from server
     func onText(text: String)
 
-    // Called when message is recieved from server
+    /// Called when message is recieved from server
     func onBinary(data: Data)
 
-    // Called when ping is recieved from server
+    /// Called when ping is recieved from server
     func onPing(data: Data)
 
-    // Called when pong is recieved from server
+    /// Called when pong is recieved from server
     func onPong(data: Data)
 
-    // Called when close message is recieved from server
+    /// Called when close message is recieved from server
     func onClose(channel: Channel, data: Data)
 
-    // Called when errored is recieved from server
+    /// Called when errored is recieved from server
     func onError(error: Error?, status: HTTPResponseStatus?)
 }
 
 extension WebSocketClientDelegate {
 
-    // Called when message is recieved from server
+    /// Called when message is recieved from server
     func onText(text: String) {}
 
-    // Called when message is recieved from server
+    /// Called when message is recieved from server
     func onBinary(data: Data) {}
 
     func onPing(data: Data) {}
@@ -672,7 +757,7 @@ extension WebSocketClientDelegate {
     func onError(error: Error?, status: HTTPResponseStatus?) {}
 }
 
-public struct CompressionConfig {
+public struct WebSocketCompressionConfiguration {
 
     var contextTakeover: ContextTakeover
     var maxWindowBits: Int32

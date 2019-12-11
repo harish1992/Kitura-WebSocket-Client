@@ -51,11 +51,15 @@ class BasicTests: WebSocketClientTests {
             let textToSend = "Hi"
             let client = WebSocketClient(host: "localhost", port: 8080,
                                          uri: self.servicePath, requestKey: "test")
+            do {
+                try client?.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client?.onText({ text in
                 XCTAssertEqual(text, textToSend, "\(text) not equal to \(textToSend)")
                 expectation.fulfill()
             })
-            client?.connect()
             client?.sendText(textToSend)
         }
     }
@@ -67,11 +71,15 @@ class BasicTests: WebSocketClientTests {
             let dataToSend = Data.init([99,100])
             let client = WebSocketClient(host: "localhost", port: 8080,
                                          uri: self.servicePath, requestKey: "test")
+            do {
+                try client?.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client?.onBinary({ (data) in
                 XCTAssertEqual(data, dataToSend, "\(data) not equal to \(dataToSend)")
                 expectation.fulfill()
             })
-            client?.connect()
             client?.sendBinary(dataToSend)
         }
     }
@@ -82,11 +90,15 @@ class BasicTests: WebSocketClientTests {
         performServerTest{ expectation in
             let dataToSend = Data.init([99,100])
             let client = WebSocketClient("http://localhost:8080/wstester")
+            do {
+                try client?.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client?.onBinary({ (data) in
                 XCTAssertEqual(data, dataToSend, "\(data) not equal to \(dataToSend)")
                 expectation.fulfill()
             })
-            client?.connect()
             client?.sendBinary(dataToSend)
         }
     }
@@ -104,35 +116,48 @@ class BasicTests: WebSocketClientTests {
                 XCTFail("Unable to create client")
                 return
             }
+            
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.onBinary { receivedData in
                 XCTAssertEqual(receivedData, payload, "The received payload \(receivedData) is not equal to the expected payload \(payload).")
                 expectation.fulfill()
             }
-            client.connect()
             client.sendBinary(payload)
         }, { expectation in
-            let options = CompressionConfig()
+            let options = WebSocketCompressionConfiguration()
             guard let client = WebSocketClient("http://localhost:8080/wstester", config: options) else {
                 XCTFail("Unable to create client")
                 return
             }
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.onBinary { receivedData in
                 XCTAssertEqual(receivedData, payload, "The received payload \(receivedData) is not equal to the expected payload \(payload).")
                 expectation.fulfill()
             }
-            client.connect()
             client.sendBinary(payload)
         }, { expectation in
-           let options = CompressionConfig()
+           let options = WebSocketCompressionConfiguration()
             guard let client = WebSocketClient("http://localhost:8080/wstester", config: options) else {
                 XCTFail("Unable to create client")
                 return
             }
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.onBinary { receivedData in
                 XCTAssertEqual(receivedData, payload, "The received payload \(receivedData) is not equal to the expected payload \(payload).")
                 expectation.fulfill()
             }
-            client.connect()
             client.sendBinary(payload, compressed: true)
         })
     }
@@ -154,10 +179,14 @@ class BasicTests: WebSocketClientTests {
                 XCTAssertEqual(receivedData, payload, "The received payload \(receivedData) is not equal to the expected payload \(payload).")
                 expectation.fulfill()
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendBinary(payload)
         }, { expectation in
-            let options = CompressionConfig()
+            let options = WebSocketCompressionConfiguration()
             guard let client = WebSocketClient("http://localhost:8080/wstester", config: options) else {
                 XCTFail("Unable to create client")
                 return
@@ -166,10 +195,14 @@ class BasicTests: WebSocketClientTests {
                 XCTAssertEqual(receivedData, payload, "The received payload \(receivedData) is not equal to the expected payload \(payload).")
                 expectation.fulfill()
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendBinary(payload)
         }, { expectation in
-           let options = CompressionConfig()
+           let options = WebSocketCompressionConfiguration()
             guard let client = WebSocketClient("http://localhost:8080/wstester", config: options) else {
                 XCTFail("Unable to create client")
                 return
@@ -178,7 +211,11 @@ class BasicTests: WebSocketClientTests {
                 XCTAssertEqual(receivedData, payload, "The received payload \(receivedData) is not equal to the expected payload \(payload).")
                 expectation.fulfill()
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendBinary(payload, compressed: true)
         })
     }
@@ -197,10 +234,14 @@ class BasicTests: WebSocketClientTests {
                 XCTAssertEqual(receivedData, payload, "The received payload \(receivedData) is not equal to the expected payload \(payload).")
                 expectation.fulfill()
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendBinary(payload)
         }, { expectation in
-            let options = CompressionConfig()
+            let options = WebSocketCompressionConfiguration()
             guard let client = WebSocketClient("http://localhost:8080/wstester", config: options) else {
                 XCTFail("Unable to create client")
                 return
@@ -209,10 +250,14 @@ class BasicTests: WebSocketClientTests {
                 XCTAssertEqual(receivedData, payload, "The received payload \(receivedData) is not equal to the expected payload \(payload).")
                 expectation.fulfill()
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendBinary(payload)
         }, { expectation in
-           let options = CompressionConfig()
+           let options = WebSocketCompressionConfiguration()
             guard let client = WebSocketClient("http://localhost:8080/wstester", config: options) else {
                 XCTFail("Unable to create client")
                 return
@@ -221,7 +266,11 @@ class BasicTests: WebSocketClientTests {
                 XCTAssertEqual(receivedData, payload, "The received payload \(receivedData) is not equal to the expected payload \(payload).")
                 expectation.fulfill()
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendBinary(payload, compressed: true)
         })
     }
@@ -237,7 +286,11 @@ class BasicTests: WebSocketClientTests {
                 XCTFail("Unable to create client")
                 return
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.ping(data: payload)
             client.onPong { code, data in
                 XCTAssertEqual(code, WebSocketOpcode.pong, "Recieved opcode \(code) is not equal to expected \(WebSocketOpcode.pong)")
@@ -255,7 +308,11 @@ class BasicTests: WebSocketClientTests {
                    XCTFail("Unable to create client")
                    return
                }
-            client1.connect()
+            do {
+                try client1.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             XCTAssertTrue(client1.isConnected, "Client not connected")
             WebSocket.unregister(path: self.servicePath)
             guard let client2 = WebSocketClient(host: "localhost", port: 8080, uri: self.servicePath, requestKey: "test") else { return }
@@ -264,7 +321,11 @@ class BasicTests: WebSocketClientTests {
                                "Status \(String(describing: status)) returned from server is not equal to \(HTTPResponseStatus.badRequest)" )
                 expectation.fulfill()
             }
-            client2.connect()
+            do {
+                try client2.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
         }
     }
 
@@ -284,10 +345,14 @@ class BasicTests: WebSocketClientTests {
                 XCTAssertEqual(receivedData, text, "The received payload \(receivedData) is not equal to the expected payload \(text).")
                 expectation.fulfill()
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendText(text)
         }, { expectation in
-            let options = CompressionConfig()
+            let options = WebSocketCompressionConfiguration()
             guard let client = WebSocketClient("http://localhost:8080/wstester", config: options) else {
                 XCTFail("Unable to create client")
                 return
@@ -296,10 +361,14 @@ class BasicTests: WebSocketClientTests {
                 XCTAssertEqual(receivedData, text, "The received payload \(receivedData) is not equal to the expected payload \(text).")
                 expectation.fulfill()
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendText(text)
         }, { expectation in
-           let options = CompressionConfig()
+           let options = WebSocketCompressionConfiguration()
             guard let client = WebSocketClient("http://localhost:8080/wstester", config: options) else {
                 XCTFail("Unable to create client")
                 return
@@ -308,7 +377,11 @@ class BasicTests: WebSocketClientTests {
                 XCTAssertEqual(receivedData, text, "The received payload \(receivedData) is not equal to the expected payload \(text).")
                 expectation.fulfill()
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendText(text, compressed: true)
         })
     }
@@ -329,10 +402,14 @@ class BasicTests: WebSocketClientTests {
                 XCTAssertEqual(receivedData, text, "The received payload \(receivedData) is not equal to the expected payload \(text).")
                 expectation.fulfill()
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendText(text)
         }, { expectation in
-            let options = CompressionConfig()
+            let options = WebSocketCompressionConfiguration()
             guard let client = WebSocketClient("http://localhost:8080/wstester", config: options) else {
                 XCTFail("Unable to create client")
                 return
@@ -341,10 +418,14 @@ class BasicTests: WebSocketClientTests {
                 XCTAssertEqual(receivedData, text, "The received payload \(receivedData) is not equal to the expected payload \(text).")
                 expectation.fulfill()
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendText(text)
         }, { expectation in
-           let options = CompressionConfig()
+           let options = WebSocketCompressionConfiguration()
             guard let client = WebSocketClient("http://localhost:8080/wstester", config: options) else {
                 XCTFail("Unable to create client")
                 return
@@ -353,7 +434,11 @@ class BasicTests: WebSocketClientTests {
                 XCTAssertEqual(receivedData, text, "The received payload \(receivedData) is not equal to the expected payload \(text).")
                 expectation.fulfill()
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendText(text, compressed: true)
         })
     }
@@ -371,10 +456,14 @@ class BasicTests: WebSocketClientTests {
                 XCTAssertEqual(receivedData, text, "The received payload \(receivedData) is not equal to the expected payload \(text).")
                 expectation.fulfill()
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendText(text)
         }, { expectation in
-            let options = CompressionConfig()
+            let options = WebSocketCompressionConfiguration()
             guard let client = WebSocketClient("http://localhost:8080/wstester", config: options) else {
                 XCTFail("Unable to create client")
                 return
@@ -383,10 +472,14 @@ class BasicTests: WebSocketClientTests {
                 XCTAssertEqual(receivedData, text, "The received payload \(receivedData) is not equal to the expected payload \(text).")
                 expectation.fulfill()
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendText(text)
         }, { expectation in
-            let options = CompressionConfig()
+            let options = WebSocketCompressionConfiguration()
             guard let client = WebSocketClient("http://localhost:8080/wstester", config: options) else {
                 XCTFail("Unable to create client")
                 return
@@ -395,7 +488,11 @@ class BasicTests: WebSocketClientTests {
                 XCTAssertEqual(receivedData, text, "The received payload \(receivedData) is not equal to the expected payload \(text).")
                 expectation.fulfill()
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendText(text, compressed: true)
         })
     }
@@ -415,7 +512,11 @@ class BasicTests: WebSocketClientTests {
                 XCTFail("Unable to create client")
                 return
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.send(model: textPayload)
             client.onText { recieved in
                 let jsonDecoder = JSONDecoder()
@@ -438,7 +539,11 @@ class BasicTests: WebSocketClientTests {
                 XCTFail("Unable to create client")
                 return
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendText("\u{00}")
             client.onText { recievedText in
                 XCTAssertEqual(recievedText, "\u{00}", "The recieve payload \(String(describing: recievedText)) is not Equal to expected payload \u{00}")
@@ -456,7 +561,11 @@ class BasicTests: WebSocketClientTests {
                 XCTFail("Unable to create client")
                 return
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.close(data: data)
             client.onClose { _, dataRecieved in
                            XCTAssertEqual(data, dataRecieved, "The payload recieved \(dataRecieved) is not equal to expected payload \(data))")
@@ -478,7 +587,11 @@ class BasicTests: WebSocketClientTests {
                 XCTFail("Unable to create client")
                 return
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.close(data: payload)
             client.onClose { _, data in
                 XCTAssertEqual(data, payload, "The payload recieved \(data) is not equal to expected payload \(payload)")

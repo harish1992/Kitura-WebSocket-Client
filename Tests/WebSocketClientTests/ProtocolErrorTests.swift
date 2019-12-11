@@ -52,7 +52,11 @@ class ProtocolError: WebSocketClientTests {
                     XCTFail("Unable to create WebSocketClient")
                     return
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendBinary(Data(bytes), finalFrame: false)
             client.sendText(textPayload, finalFrame: true)
             client.onClose {_, data in
@@ -74,7 +78,11 @@ class ProtocolError: WebSocketClientTests {
                     XCTFail("Unable to create WebSocketClient")
                     return
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.ping(data: Data(oversizedPayload))
             client.onClose {_, data in
                 var expectedData = self.uint8Code
@@ -94,7 +102,11 @@ class ProtocolError: WebSocketClientTests {
                     XCTFail("Unable to create WebSocketClient")
                     return
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             let text =  "Testing, testing 1, 2, 3. "
             client.sendMessage(data:text.data(using: .utf8)!, opcode: .ping, finalFrame: false)
             client.sendMessage(data: text.data(using: .utf8)!, opcode: .continuation, finalFrame: false)
@@ -118,7 +130,11 @@ class ProtocolError: WebSocketClientTests {
                     XCTFail("Unable to create WebSocketClient")
                     return
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.close(data: Data(oversizedPayload))
             client.onClose {_, data in
                 var expectedData = self.uint8Code
@@ -138,7 +154,11 @@ class ProtocolError: WebSocketClientTests {
                     XCTFail("Unable to create WebSocketClient")
                     return
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             let text =  "Testing, testing 1, 2, 3. "
             client.sendMessage(data:text.data(using: .utf8)!, opcode: .continuation, finalFrame: true)
             client.onClose {_, data in
@@ -161,7 +181,11 @@ class ProtocolError: WebSocketClientTests {
                     XCTFail("Unable to create WebSocketClient")
                     return
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendText(textPayload, finalFrame: false)
             client.sendBinary(Data(bytes), finalFrame: true)
             client.onClose {_, data in
@@ -184,7 +208,11 @@ class ProtocolError: WebSocketClientTests {
                     return
             }
             client.maskFrame = false
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendBinary(Data(bytes), finalFrame: true)
             client.onClose {_, data in
                 var expectedData = self.uint8Code
@@ -206,7 +234,11 @@ class ProtocolError: WebSocketClientTests {
                     return
             }
             client.maskFrame = false
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendBinary(Data(bytes), finalFrame: true, compressed: true)
             client.onClose {_, data in
                 var expectedData = self.uint8Code
@@ -227,7 +259,11 @@ class ProtocolError: WebSocketClientTests {
             payload.writeInteger(WebSocketCloseReasonCode.normal.code())
             payload.writeBytes(testString.data(using: .utf16)!)
             guard let client = WebSocketClient("http://localhost:8080/wstester") else { return }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.close(data: payload.getData(at: 0, length: payload.readableBytes)!)
             client.onClose { channel, data in
                 var expectedPayload = ByteBufferAllocator().buffer(capacity: 8)

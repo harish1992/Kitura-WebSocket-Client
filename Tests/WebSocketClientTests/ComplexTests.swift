@@ -56,7 +56,11 @@ class ComplexTests: WebSocketClientTests {
                 XCTFail("Unable to create client")
                 return
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendBinary(Data(bytes), opcode: .binary, finalFrame: false, compressed: false)
             client.sendBinary(Data(mediumBinaryPayload), opcode: .continuation, finalFrame: true, compressed: false)
             client.onBinary{ receivedData in
@@ -64,11 +68,15 @@ class ComplexTests: WebSocketClientTests {
                 expectation.fulfill()
             }
         }, { expectation in
-            guard let client = WebSocketClient("http://localhost:8080/wstester", config: CompressionConfig()) else {
+            guard let client = WebSocketClient("http://localhost:8080/wstester", config: WebSocketCompressionConfiguration()) else {
                 XCTFail("Unable to create client")
                 return
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendBinary(Data(bytes), opcode: .binary, finalFrame: false, compressed: false)
             client.sendBinary(Data(mediumBinaryPayload), opcode: .continuation, finalFrame: true, compressed: false)
             client.onBinary{ receivedData in
@@ -76,11 +84,15 @@ class ComplexTests: WebSocketClientTests {
                 expectation.fulfill()
             }
         }, { expectation in
-            guard let client = WebSocketClient("http://localhost:8080/wstester", config: CompressionConfig()) else {
+            guard let client = WebSocketClient("http://localhost:8080/wstester", config: WebSocketCompressionConfiguration()) else {
                 XCTFail("Unable to create client")
                 return
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendBinary(Data(bytes), opcode: .binary, finalFrame: false, compressed: true)
             client.sendBinary(Data(mediumBinaryPayload), opcode: .continuation, finalFrame: true, compressed: true)
             client.onBinary{ receivedData in
@@ -102,7 +114,11 @@ class ComplexTests: WebSocketClientTests {
                 XCTFail("Unable to create client")
                 return
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendBinary(Data(bytes), opcode: .binary, finalFrame: false, compressed: false)
             client.sendBinary(Data(bytes), opcode: .continuation, finalFrame: true, compressed: false)
             client.onBinary{ receivedData in
@@ -110,11 +126,15 @@ class ComplexTests: WebSocketClientTests {
                 expectation.fulfill()
             }
         }, { expectation in
-            guard let client = WebSocketClient("http://localhost:8080/wstester", config: CompressionConfig()) else {
+            guard let client = WebSocketClient("http://localhost:8080/wstester", config: WebSocketCompressionConfiguration()) else {
                 XCTFail("Unable to create client")
                 return
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendBinary(Data(bytes), opcode: .binary, finalFrame: false, compressed: false)
             client.sendBinary(Data(bytes), opcode: .continuation, finalFrame: true, compressed: false)
             client.onBinary{ receivedData in
@@ -122,11 +142,15 @@ class ComplexTests: WebSocketClientTests {
                 expectation.fulfill()
             }
         }, { expectation in
-            guard let client = WebSocketClient("http://localhost:8080/wstester", config: CompressionConfig()) else {
+            guard let client = WebSocketClient("http://localhost:8080/wstester", config: WebSocketCompressionConfiguration()) else {
                 XCTFail("Unable to create client")
                 return
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendBinary(Data(bytes), opcode: .binary, finalFrame: false, compressed: true)
             client.sendBinary(Data(bytes), opcode: .continuation, finalFrame: true, compressed: true)
             client.onBinary{ receivedData in
@@ -159,7 +183,11 @@ class ComplexTests: WebSocketClientTests {
                 XCTAssertEqual(recievedPayload, pingPayload, "Recieved opcode \(recievedPayload) is not equal expected opcode \(pingPayload).")
             }
 
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendBinary(Data(bytes), finalFrame: false)
             client.ping(data: pingPayload.data(using: .utf8)!)
             client.sendBinary(Data(bytes), opcode: .continuation,finalFrame: true)
@@ -187,8 +215,11 @@ class ComplexTests: WebSocketClientTests {
                 let recievedPayload =  String(data: data, encoding: .utf8)
                 XCTAssertEqual(recievedPayload, pingPayload, "Recieved opcode \(recievedPayload) is not equal expected opcode \(pingPayload).")
             }
-
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendText(text, finalFrame: false)
             client.ping(data: pingPayload.data(using: .utf8)!)
             client.sendText(text, opcode: .continuation,finalFrame: true)
@@ -210,7 +241,11 @@ class ComplexTests: WebSocketClientTests {
                 XCTFail("Unable to create client")
                 return
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendText(shortText, finalFrame: false)
             client.sendText(mediumText, opcode: .continuation, finalFrame: true, compressed: false)
             client.onText{ receivedData in
@@ -218,11 +253,15 @@ class ComplexTests: WebSocketClientTests {
                 expectation.fulfill()
             }
         }, { expectation in
-            guard let client = WebSocketClient("http://localhost:8080/wstester", config: CompressionConfig()) else {
+            guard let client = WebSocketClient("http://localhost:8080/wstester", config: WebSocketCompressionConfiguration()) else {
                 XCTFail("Unable to create client")
                 return
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendText(shortText, finalFrame: false)
             client.sendText(mediumText, opcode: .continuation, finalFrame: true, compressed: false)
             client.onText{ receivedData in
@@ -230,11 +269,15 @@ class ComplexTests: WebSocketClientTests {
                 expectation.fulfill()
             }
         }, { expectation in
-            guard let client = WebSocketClient("http://localhost:8080/wstester", config: CompressionConfig()) else {
+            guard let client = WebSocketClient("http://localhost:8080/wstester", config: WebSocketCompressionConfiguration()) else {
                 XCTFail("Unable to create client")
                 return
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendText(shortText, finalFrame: false, compressed: true)
             client.sendText(mediumText, opcode: .continuation, finalFrame: true, compressed: true)
             client.onText{ receivedData in
@@ -255,7 +298,11 @@ class ComplexTests: WebSocketClientTests {
                 XCTFail("Unable to create client")
                 return
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendText(shortText, finalFrame: false)
             client.sendText(shortText, opcode: .continuation, finalFrame: true, compressed: false)
             client.onText{ receivedData in
@@ -263,11 +310,15 @@ class ComplexTests: WebSocketClientTests {
                 expectation.fulfill()
             }
         }, { expectation in
-            guard let client = WebSocketClient("http://localhost:8080/wstester", config: CompressionConfig()) else {
+            guard let client = WebSocketClient("http://localhost:8080/wstester", config: WebSocketCompressionConfiguration()) else {
                 XCTFail("Unable to create client")
                 return
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendText(shortText, finalFrame: false)
             client.sendText(shortText, opcode: .continuation, finalFrame: true, compressed: false)
             client.onText{ receivedData in
@@ -275,11 +326,15 @@ class ComplexTests: WebSocketClientTests {
                 expectation.fulfill()
             }
         }, { expectation in
-            guard let client = WebSocketClient("http://localhost:8080/wstester", config: CompressionConfig()) else {
+            guard let client = WebSocketClient("http://localhost:8080/wstester", config: WebSocketCompressionConfiguration()) else {
                 XCTFail("Unable to create client")
                 return
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendText(shortText, finalFrame: false, compressed: true)
             client.sendText(shortText, opcode: .continuation, finalFrame: true, compressed: true)
             client.onText{ receivedData in
@@ -295,11 +350,16 @@ class ComplexTests: WebSocketClientTests {
         let text = "RFC7692 specifies a framework for adding compression functionality to the WebSocket Protocol"
         performServerTest { expectation in
             var count = 0
-            guard let client = WebSocketClient("http://localhost:8080/wstester", config:  CompressionConfig(contextTakeover: contextTakeover)) else {
+            guard let client = WebSocketClient("http://localhost:8080/wstester",
+                                               config: WebSocketCompressionConfiguration(contextTakeover: contextTakeover)) else {
                 XCTFail("Unable to create client")
                 return
             }
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendText(text)
             client.sendText(text)
             client.onText { receivedData in

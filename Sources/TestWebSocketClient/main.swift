@@ -54,5 +54,9 @@ class Delegate: WebSocketClientDelegate {
 
 let client = WebSocketClient("http://localhost:9001")
 let wsDelegate = Delegate(client: client)
-client?.connect()
+do {
+    try client?.connect()
+} catch {
+    print(error)
+}
 dispatchMain()

@@ -41,7 +41,11 @@ class ConnectionCleanUptests: WebSocketClientTests {
                         XCTFail("Unable to create WebSocketClient")
                         return
                 }
-                client.connect()
+                do {
+                    try client.connect()
+                } catch {
+                    XCTFail("Client connection failed with error \(error)")
+                }
                 sleep(2)
                 XCTAssertTrue(client.isConnected)
                 expectation.fulfill()
@@ -56,7 +60,11 @@ class ConnectionCleanUptests: WebSocketClientTests {
                         XCTFail("Unable to create WebSocketClient")
                         return
                 }
-                client.connect()
+                do {
+                    try client.connect()
+                } catch {
+                    XCTFail("Client connection failed with error \(error)")
+                }
                 sleep(4)
                 XCTAssertFalse(client.isConnected)
                 expectation.fulfill()
@@ -73,7 +81,11 @@ class ConnectionCleanUptests: WebSocketClientTests {
                 }
                 let delegate = ClientDelegate(client: client)
                 client.delegate = delegate
-                client.connect()
+                do {
+                    try client.connect()
+                } catch {
+                    XCTFail("Client connection failed with error \(error)")
+                }
                 sleep(4)
                 XCTAssertTrue(client.isConnected)
                 expectation.fulfill()
@@ -88,14 +100,22 @@ class ConnectionCleanUptests: WebSocketClientTests {
                                    XCTFail("Unable to create WebSocketClient")
                                    return
                            }
-                client1.connect()
+                do {
+                    try client1.connect()
+                } catch {
+                    XCTFail("Client connection failed with error \(error)")
+                }
                 guard let client2 = WebSocketClient(host: "localhost", port: 8080, uri: self.servicePath, requestKey: self.secWebKey) else {
                         XCTFail("Unable to create WebSocketClient")
                         return
                 }
                 let delegate = ClientDelegate(client: client2)
                 client2.delegate = delegate
-                client2.connect()
+                do {
+                    try client2.connect()
+                } catch {
+                    XCTFail("Client connection failed with error \(error)")
+                }
 
                 sleep(4)
                 XCTAssertFalse(client1.isConnected)

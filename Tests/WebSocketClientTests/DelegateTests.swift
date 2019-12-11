@@ -52,7 +52,11 @@ class DelegateTests: WebSocketClientTests {
                 return
             }
             client.delegate = WSClientDelegate(client: client, expectedPayload: text.data(using: .utf8)!, expectation: expectation)
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendText(text)
         }
     }
@@ -67,7 +71,11 @@ class DelegateTests: WebSocketClientTests {
                 return
             }
             client.delegate = WSClientDelegate(client: client, expectedPayload: binaryPayload, expectation: expectation)
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendBinary(binaryPayload)
         }
     }
@@ -81,7 +89,11 @@ class DelegateTests: WebSocketClientTests {
                 return
             }
             client.delegate = WSClientDelegate(client: client, expectedPayload: self.uint8Code, expectation: expectation)
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.close(data: Data())
         }
     }
@@ -95,7 +107,11 @@ class DelegateTests: WebSocketClientTests {
                 return
             }
             client.delegate = WSClientDelegate(client: client, expectedPayload: Data(), expectation: expectation)
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.ping(data: Data())
         }
     }
@@ -107,7 +123,11 @@ class DelegateTests: WebSocketClientTests {
                 return
             }
             client.delegate = WSClientDelegate(client: client, expectedPayload: Data(), expectation: expectation)
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.ping()
         }
     }
@@ -121,7 +141,11 @@ class DelegateTests: WebSocketClientTests {
                 return
             }
             client.delegate = WSClientDelegate(client: client, expectedPayload: Data(), expectation: expectation)
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendBinary(Data())
             client.onBinary { _ in
                 XCTFail("Delegates must have highest priority")
@@ -139,7 +163,11 @@ class DelegateTests: WebSocketClientTests {
                 return
             }
             client.delegate = WSClientDelegate(client: client, expectedPayload: "".data(using: .utf8)!, expectation: expectation)
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.sendText("")
             client.onText { _ in
                 XCTFail("Delegates must have highest priority")
@@ -157,7 +185,11 @@ class DelegateTests: WebSocketClientTests {
                 return
             }
             client.delegate = WSClientDelegate(client: client, expectedPayload: "".data(using: .utf8)!, expectation: expectation)
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.ping()
             client.onPong { _,_  in
                 XCTFail("Delegates must have highest priority")
@@ -175,7 +207,11 @@ class DelegateTests: WebSocketClientTests {
                 return
             }
             client.delegate = WSClientDelegate(client: client, expectedPayload: self.uint8Code, expectation: expectation)
-            client.connect()
+            do {
+                try client.connect()
+            } catch {
+                XCTFail("Client connection failed with error \(error)")
+            }
             client.close()
             client.onClose { _,_  in
                 XCTFail("Delegates must have highest priority")
