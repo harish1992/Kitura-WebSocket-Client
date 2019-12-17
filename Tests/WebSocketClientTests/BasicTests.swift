@@ -20,7 +20,7 @@ import XCTest
 import NIO
 import NIOWebSocket
 import NIOHTTP1
-@testable import WebSocketClient
+@testable import KituraWebSocketClient
 
 class BasicTests: WebSocketClientTests {
 
