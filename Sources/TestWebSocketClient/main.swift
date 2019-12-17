@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 
-import WebSocketClient
+import KituraWebSocketClient
 import NIO
 import Foundation
 import NIOHTTP1

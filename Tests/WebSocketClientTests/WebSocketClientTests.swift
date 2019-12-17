@@ -17,7 +17,7 @@
 import XCTest
 import KituraNet
 import KituraWebSocket
-@testable import WebSocketClient
+@testable import KituraWebSocketClient
 
 class WebSocketClientTests: XCTestCase {
     
