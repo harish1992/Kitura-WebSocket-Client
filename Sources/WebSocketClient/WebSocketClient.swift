@@ -700,7 +700,7 @@ enum WebSocketClientError: UInt, Error {
     }
 }
 
-/// webSocket connections errors
+/// WebSocket connection errors
 /// Client throws `WebSocketClientConnectionErrorType` when it is unable to connect to WS endpoint.
 
 public struct WebSocketClientConnectionError: Error, Equatable {
@@ -736,7 +736,6 @@ public protocol WebSocketClientDelegate {
     /// Called when close message is recieved from server
     func onClose(channel: Channel, data: Data)
 
-    /// Called when errored is recieved from server
     func onError(error: Error?, status: HTTPResponseStatus?)
 }
 
@@ -748,14 +747,23 @@ extension WebSocketClientDelegate {
     /// Called when message is recieved from server
     func onBinary(data: Data) {}
 
+    /// Called when server pings the client
     func onPing(data: Data) {}
 
+    /// Called when server replies with pong to clients ping
     func onPong(data: Data) {}
 
+    /// Called when WebSocket connection is closed
     func onClose(channel: Channel, data: Data) {}
 
     func onError(error: Error?, status: HTTPResponseStatus?) {}
 }
+
+/// WebSocket Compression Configuration
+/// This structure is used to enable compression in WebSocket Connection
+/// - parameters:
+///     - contextTakeover: enable or disable context takeover in WebSocket Connection. Both client and server context takeover is enabled by default.
+///     - maxWindowBits: Window size of  lz77 sliding window. Default value is 15
 
 public struct WebSocketCompressionConfiguration {
 
