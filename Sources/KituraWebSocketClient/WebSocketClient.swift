@@ -171,8 +171,8 @@ public class WebSocketClient {
     /// This function sends binary-formatted data to the connected server in multiple frames
     ///
     ///             // server recieves [0x11 ,0x12, 0x13] when following is sent
-    ///             client.sendBinary(data: Data([0x11,0x12]), opcode: .binary, finalFrame: false)
-    ///             client.sendMessage(data: Data([0x13]), opcode: .continuation, finalFrame: true)
+    ///             client.sendBinary(Data([0x11,0x12]), opcode: .binary, finalFrame: false)
+    ///             client.sendMessage(Data([0x13]), opcode: .continuation, finalFrame: true)
     ///
     /// - parameters:
     ///     - data: raw binary data to be sent in the frame
@@ -189,8 +189,8 @@ public class WebSocketClient {
     /// This function sends text-formatted data to the connected server in multiple frames
     ///
     ///             // server recieves "Kitura-WebSocket-NIO" when following is sent
-    ///             client.sendMessage(raw: "Kitura-WebSocket", opcode: .text, finalFrame: false)
-    ///             client.sendMessage(raw: "-NIO", opcode: .continuation, finalFrame: true)
+    ///             client.sendMessage("Kitura-WebSocket", opcode: .text, finalFrame: false)
+    ///             client.sendMessage("-NIO", opcode: .continuation, finalFrame: true)
     ///
     /// - parameters:
     ///     - raw: raw text to be sent in the frame
@@ -219,7 +219,7 @@ public class WebSocketClient {
 
     /// This function sends IOData(ByteBuffer) to the connected server
     ///
-    ///             client.sendMessage(data: byteBuffer, opcode: opcode)
+    ///             client.sendMessage(data: Data, opcode: opcode)
     ///
     /// - parameters:
     ///     - data: ByteBuffer-formatted to be sent in the frame
@@ -411,8 +411,8 @@ public class WebSocketClient {
     ///         Consider an endpoint sending data, callback function onMessage is triggered
     ///         and receieved data is available as bytebuffer
     ///
-    ///         client.onMessage { receivedData in  // receieved byteBuffer
-    ///                    // do something with recieved ByteBuffer
+    ///         client.onMessage { recievedText in  // receieved String
+    ///                    // do something with recieved String
     ///                 }
     ///
     /// Other callback functions are used similarly.
