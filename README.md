@@ -55,24 +55,28 @@ Add `Kitura-WebSocket-Client` to your target's dependencies:
 
 Add a WebSocket Client to your application as follows:
 
-```let client = WebSocketClient(host: "localhost", port: 8989, uri: "/", requestKey: "test")
+```swift
+let client = WebSocketClient(host: "localhost", port: 8989, uri: "/", requestKey: "test")
 ```
 or
 
-```let client = WebSocketClient("ws://localhost:8080")
+```swift
+let client = WebSocketClient("ws://localhost:8080")
 ```
 To enable compression the structure `WebSocketCompressionConfiguration` needs to be passed as an argument.
 
 For example :
 
-```let client = WebSocketClient(host: "localhost", port: 8989, uri: "/", requestKey: "test", compressionConfig: WebSocketCompressionConfiguration())
+```swift
+let client = WebSocketClient(host: "localhost", port: 8989, uri: "/", requestKey: "test", compressionConfig: WebSocketCompressionConfiguration())
 ```
 
 #### Sending WebSocket Messages
 
 Using this library makes sending messages, be it binary or text  easier. For example code for sending a text message to WebSocket server:
 
-```client.sendMessage("Kitura-WebSocket")
+```swift
+client.sendMessage("Kitura-WebSocket")
 ```
 Similarly the apis `sendBinary`, `ping`, `pong`,`close` sends binary data, ping, pong and close frames to server respectively.
 
@@ -82,7 +86,8 @@ Messages can be recieved on client either by creating `WebSocketClientDelegate` 
 
 To recieve a simple text message from client, we have :
 
-```client.onMessage { recievedText in  // receieved String
+```swift
+client.onMessage { recievedText in  // receieved String
                     // do something with recieved String
                }
 ```
